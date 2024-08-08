@@ -1,0 +1,21 @@
+:PROPERTIES:
+:ID:       BD26AE79-19D0-4CDA-A971-6C5BEBB3FBED
+:END:
+#+title: SSH into server using hostname setup with avahi
+
+We may want to ssh into a server using its hostname rather than its ip
+address like this:
+
+ssh user@hostname.local
+
+To achieve this we need to install some packages on the server:
+
+#+begin_src shell
+  sudo apt install avahi-daemon avahi-utils
+#+end_src
+
+Then enable and start the service:
+
+#+begin_src shell
+  sudo systemctl enable --now avahi-daemon
+#+end_src
