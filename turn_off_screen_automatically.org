@@ -1,0 +1,27 @@
+:PROPERTIES:
+:ID:       EB9BFD23-EF15-4C95-93A8-27EFE13C1765
+:END:
+#+title: Turn off screen on Ubuntu server
+
+To turn off the screen on a server like Ubuntu server we can edit the
+/etc/default/grub file as sudo and change the
+GRUB_CMDLINE_LINUX_DEFAULT line like this:
+
+#+begin_example
+  GRUB_CMDLINE_LINUX_DEFAULT="consoleblank=60"
+#+end_example
+
+This will configure the console to go blank (turn off) after 60
+seconds.
+
+We then need to update grub to read in this configuration:
+
+#+begin_src shell
+  sudo update-grub
+#+end_src
+
+We can then reboot the system to see our changes. The screen will turn
+off after the specified time in the login screen.
+
+* Reference
+https://askubuntu.com/questions/1351533/how-to-turn-off-monitor-on-ubuntu-server
