@@ -114,7 +114,7 @@ Finally, reboot your system. Everything should be working now.
 
 * Update device storage
 When installing a new Linux distro you may need to extend the file
-system to make all storage space available:
+system to make all storage space available [1]:
 
 #+begin_src shell
   sudo vgdisplay
@@ -131,4 +131,4 @@ lvextend will add the space to the volume.
 resize2fs will extend the file system.
 
 * Reference
-https://askubuntu.com/questions/1269493/how-to-make-lv-use-all-disk-space-in-pv
+[1] https://askubuntu.com/questions/1269493/how-to-make-lv-use-all-disk-space-in-pv
