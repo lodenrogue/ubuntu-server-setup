@@ -1,0 +1,134 @@
+:PROPERTIES:
+:ID:       3D0D6DB4-F478-4E8B-9F44-3D35C027F7CF
+:END:
+#+title: Ubuntu Server Installation and Setup
+
+* Flash the ISO onto a USB drive
+You can follow these steps to flash an Ubuntu ISO onto a USB drive.
+
+Your drive needs to be at least 2GB in size.
+
+1. Download the Ubuntu image you want to flash
+2. Download [[https://etcher.balena.io/#download-etcher][Etcher]]
+   We will use this to do the flashing
+3. Use Etcher to flash the drive
+
+* Boot Ubuntu on Computer
+1. Insert the USB drive
+2. On Mac:
+   - Power on Mac computer then press and hold the option/alt key until
+    you see the bootable devices
+   - Select the golden device titled EFI Boot
+
+* Proceed with installation
+Select Try or Install Ubuntu and proceed with the installation
+steps. You'll need to connect to ethernet in order for the internet to
+work during installation.
+
+* Get wifi working
+Wifi may work by default. Run this to check if a wireless interface is
+present:
+
+#+begin_src shell
+  ls /sys/class/net | grep -i wlp
+#+end_src
+
+Example output: wlp2s0
+
+If it is, then proceed to Update Netplan step.
+
+** On Mac
+To get wifi working follow the steps outlined [[https://askubuntu.com/a/1175754][here]] and [[https://yping88.medium.com/how-to-enable-wi-fi-on-ubuntu-server-20-04-without-a-wired-ethernet-connection-42e0b71ca198][here]] which are
+explained below.
+
+The following commands assumes you have a BCM4331 wifi chip installed
+which can be found by running:
+
+#+begin_src shell
+  sudo lspci -v | grep "Network" -C 10
+#+end_src
+
+If you have a different chip the 3 commands below may not work for
+you.
+
+Install the required BCM packages:
+
+#+begin_src shell
+  sudo apt-get --reinstall install bcmwl-kernel-source
+  sudo modprobe -r b43 ssb wl brcmfmac brcmsmac bcma
+  sudo modprobe wl
+#+end_src
+
+Continue with Generic Instructions
+
+** Generic Instructions 
+Install wpasupplicant, libnl-route-3–200, and libpcsclite1.
+
+Get the wireless interface name:
+
+#+begin_src shell
+  ls /sys/class/net | grep -i wlp
+#+end_src
+
+We will assume the output of this is wlp2s0 in our configuration
+below.
+
+** Update Netplan
+Make a backup of your netplan: /etc/netplan/50-cloud-init.yaml.
+
+Edit /etc/netplan/50-cloud-init.yaml:
+
+#+begin_example
+  network:
+      ethernets:
+          enp1s0f0:
+              optional: true
+              dhcp4: true
+      wifis:
+          wlp2s0:
+              dhcp4: true
+              optional: true
+              access-points:
+                  "SSID":
+                      password: "password"
+      version: 2
+      renderer: networkd
+#+end_example
+
+Make sure to set optional to true as the default will prevent the
+computer from fully starting up if no network connection is detected.
+
+Debug the plan to see if there are any issues:
+
+#+begin_src shell
+  sudo netplan --debug generate
+#+end_src
+
+If everything looks good then apply the changes:
+
+#+begin_src shell
+  sudo netplan apply
+#+end_src
+
+Finally, reboot your system. Everything should be working now.
+
+* Update device storage
+When installing a new Linux distro you may need to extend the file
+system to make all storage space available:
+
+#+begin_src shell
+  sudo vgdisplay
+  sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
+  sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+#+end_src
+
+vgdisplay will give you the name of the volume group. In our example
+that is ubuntu-vg. If we use df -h / we see that the name of the file
+system we want to increae includes ubuntu-vg.
+
+lvextend will add the space to the volume.
+
+resize2fs will extend the file system.
+
+* Reference
+https://askubuntu.com/questions/1269493/how-to-make-lv-use-all-disk-space-in-pv
